@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>I want to hang out in a bar</title>
+    <meta charset="UTF-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+    <script src="/login.js"></script>
+    <script src="/table.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css" />
+
+	<style>
+body
+{
+	background-color: blanchedalmond;
+}
+
+img
+{
+	margin-top: 5px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+}
+
+table
+{
+	margin: 20px 20px 20px 20px;
+}
+
+form
+{
+	margin-top: 20px;
+	margin-left: 20px;
+}
+
+#location-field
+{
+	width: 500px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#bar-name-text
+{
+	font-size: 20px;
+}
+
+button
+{
+	margin-left: 10px;
+}
+	</style>
+</head>
+
+<body>
+    <div id="login-panel" class="well">
+<% if (!loggedIn) 
+   { %>
+        <a href="javascript:doLogin()" id="login-link">Login</a><br />
+        <a href="javascript:doCreateNewLogin()" id="create-new-login-link">
+            Create new login</a>
+<% }
+   else
+   { %>
+        <span id="welcome-text">
+            Welcome, <%= login %></span><br />
+        <a href="javascript:doLogout()" id="logout-link">
+            Logout</a>
+<% } %>
+    </div>
+
+<h1 class="text-center">I'm thirsty and I want to hang out with others in a bar</h1>
+<form method="GET" action="/searchLocation">
+	<label for="location-field">Location</label>
+	<input id="location-field" type="text" id="location-field" 
+		name="location" />
+	<input type="submit" value="Search" />
+</form>
+
+<table id="bar-list-table">
+<% var businesses = yelp_data.businesses; %>
+<% for (var i = 0; i < businesses.length; i++)
+   { %>
+    <tr>
+        <td>
+            <img width="100" alt="<%= businesses[i].name %>"
+                src="<%= businesses[i].image_url %>" />
+        </td>
+        <td>
+            <a id="bar-name-text" href="<%= businesses[i].url %>">
+				<%= businesses[i].name %></a>
+            <br />
+            <em><%= businesses[i].snippet_text %></em>
+            <br />
+            <br />
+    <% var count = 0;
+       if (foundAttendees[businesses[i].id])
+       {
+           count = foundAttendees[businesses[i].id].length;
+       } %>
+            <span id="attendee-count-field"><%= count %>
+                <%= (count === 1 ? "person is" : "persons are") %> going</span>
+    <% if (loggedIn)
+       { 
+           if (!foundAttendees[businesses[i].id] ||
+               foundAttendees[businesses[i].id].indexOf(login) < 0)
+           { %>
+			<button type="button" onclick="doRegisterInterest(
+                '<%= businesses[i].id  %>', '<%= login %>')">
+                 I want to go</button>
+        <% } else
+           if (foundAttendees[businesses[i].id] && 
+               foundAttendees[businesses[i].id].indexOf(login) >= 0)
+           { %>
+            <button type="button" onclick="doUnregisterInterest(
+                '<%= businesses[i].id %>', '<%= login %>')">
+                I've changed my mind</button>
+        <% } %>
+    <% } %>
+        </td>
+    </tr>
+<% } %>
+</table>
+
+    <div id="new-login-form" title="Create new login" style="display: none">
+        <p>All form fields are required:</p>
+        <form>
+            <table>
+                <tr>
+                    <td>
+                        <label for="login">Login name</label>
+                    </td>
+                    <td>
+                        <input id="new-login-field" type="text" name="login" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="new-password-field">Password</label>
+                    </td>
+                    <td>
+                        <input id="new-password-field" type="password" 
+                            name="password" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div id="login-form" title="Login" style="display: none">
+        <p>Enter your credentials:</p>
+        <form>
+            <table>
+                <tr>
+                    <td>
+                        <label for="login">Login name</label>
+                    </td>
+                    <td>
+                        <input id="login-field" type="text" name="login" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="password">Password</label>
+                    </td>
+                    <td>
+                        <input id="password-field" type="password" 
+                            name="password" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+</body>
